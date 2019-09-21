@@ -14,11 +14,12 @@ function Square(props){
       
   
   class Board extends React.Component {
-    renderSquare(i) {
+    renderSquare(i, ...coordinates) {
       return (
             <Square 
+                coordinates={'(' + coordinates.join(',') + ')'}
                 value={this.props.squares[i]}
-                onClick={() => this.props.onClick(i)}
+                onClick={() => this.props.onClick(i, `(${(coordinates.join(','))})`)}
             />
       ); 
     }
@@ -27,19 +28,19 @@ function Square(props){
       return (
         <div>
           <div className="board-row">
-            {this.renderSquare(0)}
-            {this.renderSquare(1)}
-            {this.renderSquare(2)}
+            {this.renderSquare(0, 1, 1)}
+            {this.renderSquare(1, 1, 2)}
+            {this.renderSquare(2, 1, 3)}
           </div>
           <div className="board-row">
-            {this.renderSquare(3)}
-            {this.renderSquare(4)}
-            {this.renderSquare(5)}
+            {this.renderSquare(3, 2, 1)}
+            {this.renderSquare(4, 2, 2)}
+            {this.renderSquare(5, 2, 3)}
           </div>
           <div className="board-row">
-            {this.renderSquare(6)}
-            {this.renderSquare(7)}
-            {this.renderSquare(8)}
+            {this.renderSquare(6, 3, 1)}
+            {this.renderSquare(7, 3, 2)}
+            {this.renderSquare(8, 3, 3)}
           </div>
         </div>
       );
@@ -54,14 +55,19 @@ function Square(props){
                 squares: Array(9).fill(null),
             }], 
             stepNumber: 0,
-            xIsNext: true, 
+            xIsNext: true,
+            lastCoords: [], 
         }; 
     }
 
-    handleClick(i) {
+    handleClick(i, coordinates) {
         const history = this.state.history.slice(0, this.state.stepNumber + 1);  
         const current = history[history.length -1]; 
         const squares = current.squares.slice(); 
+        const coords = coordinates
+        console.log(coords)
+        this.state.lastCoords.push(coords)
+        console.log(this.state.lastCoords)
             if(calculateWinner(squares) || squares[i]) {
                 return;
             }
@@ -89,15 +95,20 @@ function Square(props){
     const winner = calculateWinner(current.squares); 
 
     const moves = history.map((step, move) => {
+        console.log(move)
+        const coordinateDesc = move ? 
+        this.state.lastCoords[this.state.lastCoords.length - 1] :
+        '';
         const desc = move ? 
             'Go to move #' + move : 
             'Go to game start'; 
             return (
                 <li key={move}>
-                    <button onClick={() => this.jumpTo(move)}>{desc}</button>
+                    <button onClick={() => this.jumpTo(move)}>{desc} {coordinateDesc}</button>
                 </li>
             ); 
     }); 
+
         let status; 
         if(winner) {
             status = 'Winner: ' + winner;
@@ -109,7 +120,7 @@ function Square(props){
         <div className="game-board">
         <Board 
             squares={current.squares}
-            onClick={(i) => {this.handleClick(i)}}
+            onClick={(i, coordinates) => {this.handleClick(i, coordinates)}}
         />
 
         </div>
